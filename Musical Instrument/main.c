@@ -637,12 +637,12 @@ static void MX_GPIO_Init(void)
 
 static void set_tone(uint32_t freq)
 {
+  // This assumes the N is 100
+  // This assumes the PSC is 1
+  // The arr starts at 39, but gets edited
   uint32_t tim_clk = HAL_RCC_GetPCLK1Freq();
-  uint32_t ticks = freq * N;
+  uint32_t arr = (tim_clk + (freq * N) / 2) / (freq * N) - 1;
 
-  uint32_t arr = (tim_clk + ticks / 2) / ticks - 1;
-
-  __HAL_TIM_SET_PRESCALER(&htim6, 0);
   __HAL_TIM_SET_AUTORELOAD(&htim6, arr);
 }
 
