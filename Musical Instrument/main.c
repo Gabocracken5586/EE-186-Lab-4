@@ -71,7 +71,7 @@ static void MX_LPUART1_UART_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
-static void set_tone(uint32_t freq);
+static void changeNote(uint32_t freq);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -125,7 +125,7 @@ int main(void)
     sine_table[i] = pass;
   }
 
-  set_tone(MIN_FREQ);
+  changeTone(MIN_FREQ);
   HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, sine_table, N, DAC_ALIGN_12B_R);
   HAL_TIM_Base_Start(&htim6);
   /* USER CODE END 2 */
@@ -140,11 +140,12 @@ int main(void)
     // The following is meant for debugging
     HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+    // Tries to sort of scale the notes to account for a widder array of tones 
+    // based on the lighting at the room I was in when recorded video.
     uint32_t frequency = (HAL_ADC_GetValue(&hadc1) - 700) * (25/13);
-    // frequency = (frequency * 2) - 700;
     HAL_ADC_Stop(&hadc1);
 
-    set_tone(frequency);
+    changeNote(frequency);
     snprintf(buf, sizeof(buf), "Frequency Read: %lu Hz\r\n", frequency);
     HAL_UART_Transmit(&hlpuart1, (uint8_t*)buf, strlen(buf), 100);
   }
@@ -635,7 +636,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-static void set_tone(uint32_t freq)
+static void changeNote(uint32_t freq)
 {
   // This assumes the N is 100
   // This assumes the PSC is 1
